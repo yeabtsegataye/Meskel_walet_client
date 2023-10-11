@@ -2,8 +2,14 @@ import React from 'react';
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import './Dashboard.css'; // Import the CSS file
+import { UseAuthContext } from '../Hooks/useAuthContext';
+import { useToast } from '@chakra-ui/react';
 
 const Dashboard = () => {
+  const { user } = UseAuthContext();
+  const Toast = useToast();
+  const [loading , setLoading]= useState(false)
   const [people, setPeople] = useState({
     name: '',
     gender: '',
@@ -29,22 +35,43 @@ const Dashboard = () => {
   };
   //when press submit button to post the data to the form
   const api3 = import.meta.env.VITE_API_ADD
-
+  const config = {
+    headers: {
+      Authorization: `Bearer ${user.token}`,
+    },
+  };
   const handleSubmit = (e) => {
+    setLoading(true)
     e.preventDefault();
-    axios
-      .post(api3, people)
-      .then((result) => {
-        alert('Person added sucessfully');
+   const result = axios
+      .post(api3, people ,config)
+      .then(() => {
         navigate('/');
-        console.log(result);
       })
+      .then(()=>setLoading(false))
       .catch((err) => console.log(err));
-      console.log("from dashboard",people)
+      if(result){
+        Toast({
+          title: " successfully ADDED",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+      if(!result){
+        Toast({
+          title: "Adding failed",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        })
+      }
   };
   return (
     <div className="d-flex w-100 justify-content-center align-items-center">
-      <div className="w-50 border mt-5 rounded bg-secondary text-white p-5">
+    <div className="dashboard-container border mt-5 rounded bg-secondary text-white p-5">
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name">Name: </label>
@@ -198,7 +225,9 @@ const Dashboard = () => {
               onChange={handleInput}
             />
           </div>
-          <button className="btn btn-info mt-1">Submit</button>
+      {!loading && <button className="btn btn-info mt-1">Submit</button>}
+      {loading && <button className="btn btn-info mt-1" disabled style={{cursor: "not-allowed"}}>loading ...</button>}
+         
         </form>
       </div>
     </div>

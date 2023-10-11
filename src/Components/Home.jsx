@@ -3,62 +3,121 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { UseAuthContext } from "../Hooks/useAuthContext";
+import { useToast } from '@chakra-ui/react';
 
 const Home = () => {
   const [people, setPeople] = useState([]);
   const { user } = UseAuthContext();
-  const api = import.meta.env.VITE_API
-  const api2 = import.meta.env.VITE_API_DELETE
+  const api = import.meta.env.VITE_API;
+  const api2 = import.meta.env.VITE_API_DELETE;
+  const Toast = useToast();
 
-  
   useEffect(() => {
     axios
       .get(api)
       .then((result) => setPeople(result.data))
-      .catch((err) => console.log(err));
+      .then(()=>{
+        Toast({
+          title: " data fatched",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      })
+      .catch((err) =>  Toast({
+        title: err.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      }))
   }, []);
 
   const handleDelete = (id) => {
     const confirmDelete = window.confirm('Do you want to delete?');
     if (confirmDelete) {
-      axios
-        .delete(api2 + id)
-        .then((result) => {
-          alert('Record deleted');
-          window.location.reload(); // Reload the page after delete
-        })
-        .catch((err) => console.log(err));
+      if (user) { // Check if user exists before accessing its properties
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
+       const result = axios
+          .delete(api2 + id, config)
+          .then((result) => {
+            alert('Record deleted');
+            window.location.reload(); // Reload the page after delete
+          })
+          .catch((err) => console.log(err));
+          if(result){
+            Toast({
+              title: " successfully Deleted",
+              status: "success",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            });
+          }
+          if(!result){
+            Toast({
+              title: "DEleting failed",
+              status: "error",
+              duration: 5000,
+              isClosable: true,
+              position: "bottom",
+            })
+          }
+      } else {
+        Toast({
+          title: "unexpected error",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        }); 
+        console.log('No user found');
+      }
+    }if(!confirmDelete){
+      Toast({
+        title: "NO data deleted",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      }); 
     }
   };
 
   const totalCash = people.reduce((total, person) => {
     const personalTotal =
-      (person.Tikmt ? parseInt(person.Tikmt) : 0) +
-      (person.Hidar ? parseInt(person.Hidar) : 0) +
-      (person.Tahisas ? parseInt(person.Tahisas) : 0) +
-      (person.Tir ? parseInt(person.Tir) : 0) +
-      (person.Yekatit ? parseInt(person.Yekatit) : 0) +
-      (person.Megabit ? parseInt(person.Megabit) : 0) +
-      (person.Miyaziya ? parseInt(person.Miyaziya) : 0) +
-      (person.Ginbot ? parseInt(person.Ginbot) : 0) +
-      (person.Sene ? parseInt(person.Sene) : 0) +
-      (person.Hamle ? parseInt(person.Hamle) : 0) +
-      (person.Nehase ? parseInt(person.Nehase) : 0) +
-      (person.Meskerm ? parseInt(person.Meskerm) : 0);
+      (person.Tikmt ? parseFloat(person.Tikmt) : 0) +
+      (person.Hidar ? parseFloat(person.Hidar) : 0) +
+      (person.Tahisas ? parseFloat(person.Tahisas) : 0) +
+      (person.Tir ? parseFloat(person.Tir) : 0) +
+      (person.Yekatit ? parseFloat(person.Yekatit) : 0) +
+      (person.Megabit ? parseFloat(person.Megabit) : 0) +
+      (person.Miyaziya ? parseFloat(person.Miyaziya) : 0) +
+      (person.Ginbot ? parseFloat(person.Ginbot) : 0) +
+      (person.Sene ? parseFloat(person.Sene) : 0) +
+      (person.Hamle ? parseFloat(person.Hamle) : 0) +
+      (person.Nehase ? parseFloat(person.Nehase) : 0) +
+      (person.Meskerm ? parseFloat(person.Meskerm) : 0);
     return total + personalTotal;
   }, 0);
+  const formattedTotalCash = totalCash.toLocaleString();
 
   return (
-    <div style={{ height: '100vh' }}>
+    <div style={{ height: '100vh',backgroundColor:"lightgray" }}>
       
-      <div className="mt-3">
+      <div className="pt-3">
         <div className="w-100">
           <h2 className="text-center font-weight-bold">
-            Total current cash = {totalCash}
+            Total Current Cash = {formattedTotalCash}
           </h2>
           <div className="table-responsive">
-            <table className="table text-center mt-3">
-              <thead className="table-success sticky-header">
+            <table className="table text-center mt-3 bg-secondary" >
+              <thead className="table-dark sticky-header">
                 <tr>
                   <th>Name</th>
                   <th>Gender</th>
@@ -82,18 +141,18 @@ const Home = () => {
               <tbody>
                 {people.map((person) => {
                   const personalTotal =
-                    (person.Tikmt ? parseInt(person.Tikmt) : 0) +
-                    (person.Hidar ? parseInt(person.Hidar) : 0) +
-                    (person.Tahisas ? parseInt(person.Tahisas) : 0) +
-                    (person.Tir ? parseInt(person.Tir) : 0) +
-                    (person.Yekatit ? parseInt(person.Yekatit) : 0) +
-                    (person.Megabit ? parseInt(person.Megabit) : 0) +
-                    (person.Miyaziya ? parseInt(person.Miyaziya) : 0) +
-                    (person.Ginbot ? parseInt(person.Ginbot) : 0) +
-                    (person.Sene ? parseInt(person.Sene) : 0) +
-                    (person.Hamle ? parseInt(person.Hamle) : 0) +
-                    (person.Nehase ? parseInt(person.Nehase) : 0) +
-                    (person.Meskerm ? parseInt(person.Meskerm) : 0);
+                    (person.Tikmt ? parseFloat(person.Tikmt) : 0) +
+                    (person.Hidar ? parseFloat(person.Hidar) : 0) +
+                    (person.Tahisas ? parseFloat(person.Tahisas) : 0) +
+                    (person.Tir ? parseFloat(person.Tir) : 0) +
+                    (person.Yekatit ? parseFloat(person.Yekatit) : 0) +
+                    (person.Megabit ? parseFloat(person.Megabit) : 0) +
+                    (person.Miyaziya ? parseFloat(person.Miyaziya) : 0) +
+                    (person.Ginbot ? parseFloat(person.Ginbot) : 0) +
+                    (person.Sene ? parseFloat(person.Sene) : 0) +
+                    (person.Hamle ? parseFloat(person.Hamle) : 0) +
+                    (person.Nehase ? parseFloat(person.Nehase) : 0) +
+                    (person.Meskerm ? parseFloat(person.Meskerm) : 0);
 
                   return (
                     <tr key={person._id}>

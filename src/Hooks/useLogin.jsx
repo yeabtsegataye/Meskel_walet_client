@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { UseAuthContext } from './useAuthContext';
+import { useToast } from "@chakra-ui/react";
 
 export const useLogin = () => {
   const { dispatch } = UseAuthContext();
-  const [isLoading, setIsLoading] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const apiLogin = import.meta.env.VITE_API_LOGIN
+  const Toast = useToast();
+
   const login = async (Email, password) => {
     setIsLoading(true);
     const response = await fetch(
@@ -21,13 +24,27 @@ export const useLogin = () => {
     const json = await response.json();
 
     if (!response.ok) {
-  console.log('error')
+      setError(json.error);
+      setIsLoading(false);
+      Toast({
+        title: "Loged in failed",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
     }
     if (response.ok) {
       dispatch({ type: 'LOGIN', payload: json });
       setIsLoading(false);
       localStorage.setItem('user', JSON.stringify(json));
-      
+      Toast({
+        title: "Loged in successfully",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+        position: "bottom",
+      });
     }
   };
   return { isLoading, error, login };

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { UseAuthContext } from '../Hooks/useAuthContext';
 import { UseLogout } from '../Hooks/useLogout';
-import './navbar.css'; //Import your custom CSS file
+import './navbar.css'; // Import your custom CSS file
 
 const Navbar = () => {
   const { logout } = UseLogout();
@@ -11,8 +11,8 @@ const Navbar = () => {
   };
   const { user } = UseAuthContext();
   return (
-    <div>
-      <nav className="navbar navbar-expand-sm navbar-dark bg-secondary">
+    <div >
+      <nav className="navbar navbar-expand-sm navbar-dark bg-dark">
         <div className="container">
           <Link className="navbar-brand" to="/">
             Meskel Wallet
@@ -29,23 +29,23 @@ const Navbar = () => {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav ml-auto">
+            <ul className="navbar-nav ms-auto"> {/* Use ms-auto to align to the right */}
               {user && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/Dashboard">
+                <li className="nav-item"style={{marginRight:'1rem'}}>
+                  <Link className="nav-link " to="/Dashboard">
                     Dashboard
                   </Link>
                 </li>
               )}
               {!user && (
                 <li className="nav-item">
-                  <Link className="btn btn-light mr-2" to="/login">
+                  <Link className="btn btn-light ml-2" to="/login">
                     Login
                   </Link>
                 </li>
               )}
               {user && (
-                <li className="nav-item ml-auto">
+                <li className="nav-item">
                   <button
                     className="btn btn-light"
                     onClick={handl_logout}

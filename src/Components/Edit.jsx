@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './Dashboard.css'; 
+import { UseAuthContext } from '../Hooks/useAuthContext';
+import { useToast } from '@chakra-ui/react';
 
 const Edit = () => {
-  const { id } = useParams(); //take id from url
-
+  const { user } = UseAuthContext();
+  const { id } = useParams(); 
+  const Toast = useToast();
+  const [loading, setLoading]= useState(false)
   const [people, setPeople] = useState({
     name: '',
     gender: '',
@@ -41,18 +46,46 @@ const Edit = () => {
   //then to update the data
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios
-      .put(api2 + id, people)
+    if(user){
+    const config = {
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    };
+    setLoading(true)
+    const result = axios
+      .put(api2 + id, people,config)
       .then((result) => {
-        alert('Person Updated sucessfully');
         navigate('/');
-        console.log(result);
       })
-      .catch((err) => console.log(err));
+      .then(()=> setLoading(false))
+      .catch((err) => console.log(err.message));
+      if(result){
+        Toast({
+          title: " successfully Edited",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        });
+      }
+      if(!result){
+        Toast({
+          title: "Editing failed",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+          position: "bottom",
+        })
+      }
+    }
+    else{
+      setLoading(false)
+    }
   };
   return (
     <div className="d-flex w-100 justify-content-center align-items-center">
-      <div className="w-50 border mt-5 rounded bg-secondary text-white p-5">
+    <div className="dashboard-container border mt-5 rounded bg-secondary text-white p-5">
         <form onSubmit={handleSubmit}>
           <div>
             <label htmlFor="name">Name: </label>
@@ -221,7 +254,9 @@ const Edit = () => {
               value={people.Meskerm}
             />
           </div>
-          <button className="btn btn-info mt-1">Edit</button>
+          {loading &&<button className="btn btn-info mt-1" disabled style={{cursor: "not-allowed"}}>loading ...</button>}
+          {!loading &&<button className="btn btn-info mt-1">Edit</button>}
+
         </form>
       </div>
     </div>

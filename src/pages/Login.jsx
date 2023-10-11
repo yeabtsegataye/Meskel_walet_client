@@ -14,7 +14,6 @@ function Login() {
   // const navigate = useNavigate();
 
   const handle_submit = async (e) => {
-    console.log(email, password);
     e.preventDefault();
     await login(email, password);
     if (user) {
@@ -53,9 +52,12 @@ function Login() {
             />
           </label>
 
-          <button className="submit" type="submit" disabled={isLoading}>
+          {isLoading &&<button className="submit" type="submit" disabled style={{cursor: "not-allowed"}}>
+            loading ...
+          </button>}
+          {!isLoading &&<button className="submit" type="submit">
             Submit
-          </button>
+          </button>}     
           {error && <div className="error">{error}</div>}
         </form>
       </div>
